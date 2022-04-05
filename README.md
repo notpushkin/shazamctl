@@ -1,7 +1,7 @@
 # shazamctl
 
 ```sh
-pipx install git+https://gitlab.com/notpushkin/shazamctl
+pipx install git+https://codeberg.org/notpushkin/shazamctl
 ```
 
 ## Usage
