@@ -6,6 +6,8 @@ from pathlib import Path
 import typer
 from shazamapi import Shazam
 
+SONG_LINK_TEMPLATE = "https://song.link/i/{0}"
+
 echo_err = partial(typer.echo, err=True)
 logger = getLogger(__name__)
 app = typer.Typer()
@@ -31,26 +33,46 @@ def recognize(
 ):
     prev_track_key = None
     for (offset, resp) in Shazam().recognize_song(infile):
+        logger.debug(
+            "At {offset}: {resp}".format(
+                offset=format_offset(offset),
+                resp=json.dumps(resp, indent=4),
+            ),
+        )
+
         track = resp.get("track")
         if track is None:
-            logger.info(
-                "At {offset}: {resp}".format(
-                    offset=format_offset(offset),
-                    resp=json.dumps(resp, indent=4),
-                ),
-            )
             continue
 
         next_track_key = track.get("key")
         if prev_track_key and next_track_key == prev_track_key:
             continue
 
-        typer.echo(
-            "At {offset}: {title} by {artist}".format(
-                offset=format_offset(offset),
-                title=track.get("title", "Unknown track"),
-                artist=track.get("subtitle", "Unknown artist"),
+        actions: list = track.get("hub", {}).get("actions", [])
+        apple_music_id = next(
+            (
+                action.get("id")
+                for action in actions
+                if action.get("type") == "applemusicplay"
             ),
+            None,
+        )
+
+        typer.echo(
+            "\n            ".join((
+                "At {offset}: {title}".format(
+                    offset=format_offset(offset),
+                    title=track.get("title", "Unknown track"),
+                ),
+                "by {artist}".format(
+                    artist=track.get("subtitle", "Unknown artist"),
+                ),
+                *(
+                    [] if apple_music_id is None
+                    else [SONG_LINK_TEMPLATE.format(apple_music_id)]
+                ),
+                "",
+            )),
         )
 
         prev_track_key = next_track_key

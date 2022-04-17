@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "Open-source Shazam CLI"
 authors = ["Alexander Pushkov <alexander@notpushk.in>"]
 license = "ISC"
+readme = "README.md"
 
 [tool.poetry.scripts]
 shazamctl = "shazamctl.cli:app"
