@@ -94,7 +94,7 @@ def recognize(
 
 
 @app.command()
-def listen(multiple: bool = typer.Option(True)):
+def listen(multiple: bool = typer.Option(False)):
     echo_err("Listening...")
     print_recognitions(
         recognitions=recognize_microphone(),
