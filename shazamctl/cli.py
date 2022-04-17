@@ -1,19 +1,36 @@
 import json
+import logging
 from functools import partial
-from logging import getLogger
 from pathlib import Path
-from typing import Iterable
+from types import MappingProxyType
+from typing import Final, Iterable
 
 import typer
 from shazamapi import Shazam
 
 from shazamctl.microphone import recognize_microphone
 
-SONG_LINK_TEMPLATE = "https://song.link/i/{0}"
+SONG_LINK_TEMPLATE: Final = "https://song.link/i/{0}"
+VERBOSITY_COUNT_TO_LEVEL: Final = MappingProxyType({
+    0: logging.ERROR,
+    1: logging.WARNING,
+    2: logging.INFO,
+    3: logging.DEBUG,
+})
 
 echo_err = partial(typer.echo, err=True)
-logger = getLogger(__name__)
+logger = logging.getLogger(__name__)
 app = typer.Typer()
+
+
+@app.callback()
+def main(verbose: int = typer.Option(0, "-v", count=True)):
+    """
+    A toy command-line client for Shazam.
+    """
+    logging.basicConfig(
+        level=VERBOSITY_COUNT_TO_LEVEL.get(verbose, logging.DEBUG),
+    )
 
 
 def format_offset(seconds: int):
