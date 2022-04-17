@@ -10,12 +10,16 @@ Recognize music from files:
 
 ```
 $ shazamctl recognize path/to/rickroll.mp3
-At 0:00:10: Never Gonna Give You Up by Rick Astley
+At 0:00:10: Never Gonna Give You Up
+            by Rick Astley
 ```
 
 ```
-$ shazamctl recognize path/to/1h_hardbass_mix.mp3 --multiple
-At 0:00:16: Russian Vodka by XS Project
+$ shazamctl recognize path/to/1h_dnb_mix.mp3 --multiple
+At 0:00:16: Higher
+            by AKTIVE
+            https://song.link/i/1557355435
+
 At 0:03:21: ...
 ```
 
@@ -23,7 +27,10 @@ Or from microphone:
 
 ```
 $ shazamctl listen
-At 0:00:16: Russian Vodka by XS Project
+Listening...
+At 0:00:14: Imperium
+            by Madeon
+            https://song.link/i/955824973
 ```
 
 
