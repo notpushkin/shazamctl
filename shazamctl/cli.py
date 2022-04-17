@@ -2,9 +2,12 @@ import json
 from functools import partial
 from logging import getLogger
 from pathlib import Path
+from typing import Iterable
 
 import typer
 from shazamapi import Shazam
+
+from shazamctl.microphone import recognize_microphone
 
 SONG_LINK_TEMPLATE = "https://song.link/i/{0}"
 
@@ -23,16 +26,12 @@ def format_offset(seconds: int):
     )
 
 
-@app.command()
-def recognize(
-    infile: Path,
-    multiple: bool = typer.Option(
-        default=False,
-        help="Don't stop after recognizing one track",
-    ),
+def print_recognitions(
+    recognitions: Iterable[dict],
+    multiple: bool = False,
 ):
     prev_track_key = None
-    for (offset, resp) in Shazam().recognize_song(infile):
+    for (offset, resp) in recognitions:
         logger.debug(
             "At {offset}: {resp}".format(
                 offset=format_offset(offset),
@@ -81,5 +80,22 @@ def recognize(
 
 
 @app.command()
+def recognize(
+    infile: Path,
+    multiple: bool = typer.Option(
+        default=False,
+        help="Don't stop after recognizing one track",
+    ),
+):
+    print_recognitions(
+        recognitions=Shazam().recognize_song(infile),
+        multiple=multiple,
+    )
+
+
+@app.command()
 def listen(multiple: bool = typer.Option(True)):
-    echo_err("Not implemented... yet")
+    print_recognitions(
+        recognitions=recognize_microphone(),
+        multiple=multiple,
+    )
