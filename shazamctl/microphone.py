@@ -1,9 +1,14 @@
 from array import array
 from typing import Final, Generator, Tuple
 
-from pyaudio import PyAudio, paInt16
 from shazamapi import Shazam
 from shazamapi.algorithm import SignatureGenerator
+
+try:
+    from pyaudio import PyAudio, paInt16  # noqa: WPS433
+except ImportError:
+    paInt16 = 8  # noqa: N816
+    PyAudio = None
 
 ARRAY_TYPE_SIGNED_SHORT: Final = "h"
 
@@ -15,6 +20,9 @@ CHUNK: Final = 1024
 
 
 def recognize_microphone() -> Generator[Tuple[int, dict], None, None]:
+    if PyAudio is None:
+        raise RuntimeError("PyAudio is not installed")
+
     stream = PyAudio().open(
         format=FORMAT,
         channels=CHANNELS,
