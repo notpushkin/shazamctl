@@ -4,6 +4,7 @@ from functools import partial
 from pathlib import Path
 from types import MappingProxyType
 from typing import Final, Iterable
+import webbrowser
 
 import typer
 from shazamapi import Shazam
@@ -46,6 +47,7 @@ def format_offset(seconds: int):
 def print_recognitions(
     recognitions: Iterable[dict],
     multiple: bool = False,
+    open: bool = False,
 ):
     prev_track_key = None
     for (offset, resp) in recognitions:
@@ -90,6 +92,8 @@ def print_recognitions(
                 "",
             )),
         )
+        if open and apple_music_id is not None:
+            webbrowser.open(SONG_LINK_TEMPLATE.format(apple_music_id))
 
         prev_track_key = next_track_key
         if not multiple:
@@ -103,17 +107,40 @@ def recognize(
         default=False,
         help="Don't stop after recognizing one track",
     ),
+    no_open: bool = typer.Option(
+        None,
+        "--no-open /",
+        help="Do not open song page after recognition (default if --multiple specified)",
+    ),
 ):
+    if no_open is None:
+        no_open = multiple
+
     print_recognitions(
         recognitions=Shazam().recognize_song(infile),
         multiple=multiple,
+        open=not no_open,
     )
 
 
 @app.command()
-def listen(multiple: bool = typer.Option(False)):
+def listen(
+    multiple: bool = typer.Option(
+        default=False,
+        help="Don't stop after recognizing one track",
+    ),
+    no_open: bool = typer.Option(
+        None,
+        "--no-open /",
+        help="Do not open song page after recognition (default if --multiple specified)",
+    ),
+):
+    if no_open is None:
+        no_open = multiple
+
     echo_err("Listening...")
     print_recognitions(
         recognitions=recognize_microphone(),
         multiple=multiple,
+        open=not no_open,
     )
